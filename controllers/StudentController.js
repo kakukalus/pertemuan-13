@@ -2,55 +2,36 @@
 const Student = require("../models/Student");
 
 class StudentController {
+
+  statusData(res, number, message, data = {}) {
+    const dataContent = {
+      message: message,
+      data: data
+    };
+
+    return res.status(number).json(dataContent);
+  }
+
   async index(req, res) {
     // Memanggil method all dari Model Student
     const students = await Student.all();
 
     // Cek apakah data array tidak kosong
-    if (students.length > 0) {
-      const data = {
-        message: "Menampilkkan semua students",
-        data: students,
-      };
+    if (students.length > 0)
+      return this.statusData(res, 200, 'Menampilkkan semua students', students);
 
-      return res.status(200).json(data);
-    }
-
-    // Jika data array kosong
-    const data = {
-      message: "Students is empty",
-    };
-
-    return res.status(200).json(data);
+    return this.statusData(res, 200, 'Students is empty');
   }
 
   async store(req, res) {
-    /**
-     * Validasi sederhana:
-     * - Handle jika salah satu data tidak dikirim
-     */
 
-    // destructing object req.body
-    const { nama, nim, email, jurusan } = req.body;
-
-    // jika data undefined maka kirim response error
-    if (!nama || !nim || !email || !jurusan) {
-      const data = {
-        message: "Semua data harus dikirim",
-      };
-
-      return res.status(422).json(data);
-    }
-
+    validation(req);
     // Memanggil method create dari model Student.
     const student = await Student.create(req.body);
 
-    const data = {
-      message: "Menambahkan data student",
-      data: student,
-    };
+    return statusData(res, 201, 'Menambahkan data student', students);
 
-    return res.status(201).json(data);
+
   }
 
   async update(req, res) {
@@ -61,21 +42,12 @@ class StudentController {
     // Jika data ada, maka update data.
     if (student) {
       // Memanggil method update dari model Student.
+      validation(req);
       const student = await Student.update(id, req.body);
-      const data = {
-        message: `Mengedit data students`,
-        data: student,
-      };
-
-      return res.status(200).json(data);
+      return statusData(res, 200, `Mengedit data students`);
     }
+    return statusData(res, 404, `Student not found`);
 
-    // Jika data tidak ditemukan
-    const data = {
-      message: `Student not found`,
-    };
-
-    return res.status(404).json(data);
   }
 
   async destroy(req, res) {
@@ -87,19 +59,11 @@ class StudentController {
     if (student) {
       // Memanggil method delete dari Model Student
       await Student.delete(id);
-      const data = {
-        message: `Menghapus data students`,
-      };
-
-      return res.status(200).json(data);
+      statusData(res, 200, `Menghapus data students`);
     }
 
     // Jika data tidak ditemukan
-    const data = {
-      message: `Student not found`,
-    };
-
-    return res.status(404).json(data);
+    statusData(res, 404, `Student not found`);
   }
 
   async show(req, res) {
@@ -116,13 +80,29 @@ class StudentController {
 
       return res.status(200).json(data);
     }
-
     // Jika data tidak ditemukan
-    const data = {
-      message: `Student not found`,
-    };
+    statusData(res, 404, `Student not found`);
+  }
 
-    res.status(404).json(data);
+
+
+  validation(req) {
+    /**
+ * Validasi sederhana:
+ * - Handle jika salah satu data tidak dikirim
+ */
+
+    // destructing object req.body
+    const { nama, nim, email, jurusan } = req.body;
+
+    // jika data undefined maka kirim response error
+    if (!nama || !nim || !email || !jurusan) {
+      const data = {
+        message: "Semua data harus dikirim",
+      };
+
+      return res.status(422).json(data);
+    }
   }
 }
 

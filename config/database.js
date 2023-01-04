@@ -12,7 +12,7 @@ const db = mysql.createConnection({
   host: DB_HOST || "localhost",
   user: DB_USERNAME || "root",
   password: DB_PASSWORD || "",
-  database: DB_DATABASE || "laravel_rest_api",
+  database: DB_DATABASE || "pertemuan_12",
 });
 
 /**
